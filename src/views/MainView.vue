@@ -1,14 +1,6 @@
 <template>
   <div class="container">
-    <div id="gameboard">
-
-    <div v-for="row in 8" class="row" :key="row">
-      <div v-for="col in 8" v-bind:class = "(col%2===0 +row%2)?'light':'dark'" class="square" :key="col">
-
-      </div>
-    </div>
-    
-    </div>
+    <div id="gameboard"></div>
   </div>
 </template>
 
@@ -25,15 +17,9 @@ onMounted(() => {
 
 
 function drawBoard(){
-
-let boardArray = new Array(64).fill(0);
-
-boardArray.forEach(()=>{
-    const square = document.createElement('div');
+  const square = document.createElement('div');
   square.classList.add(square);
   square.class.add('light')
-  })
-
   document.getElementById("#gameboard");
 }
 
