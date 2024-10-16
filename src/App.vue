@@ -14,10 +14,6 @@
 
 
 <script setup>
-
-import { onMounted } from 'vue'
-let boardArray = new Array(8).fill(new Array(8).fill(0));
-
 // let chessPieces = {
 //     pawn: 1,
 //     rook: 2,
@@ -39,28 +35,6 @@ let chessBoard = [
     [{piece: 'chess-knight', color: 'white'}, {piece: 'chess-pawn', color: 'white'}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: 'chess-pawn', color: 'black'}, {piece: 'chess-knight', color: 'black'}],
     [{piece: 'chess-rook', color: 'white'}, {piece: 'chess-pawn', color: 'white'}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: 'chess-pawn', color: 'black'}, {piece: 'chess-rook', color: 'black'}]
 ];
-
-
-
-
-onMounted(() => {
-  drawBoard();
-})
-
-
-function drawBoard(){
-
-
-
-boardArray.forEach(()=>{
-    const square = document.createElement('div');
-  square.classList.add(square);
-  square.class.add('light')
-  })
-
-  document.getElementById("#gameboard");
-}
-
 </script>
 <style scoped>
 #gameboard{
