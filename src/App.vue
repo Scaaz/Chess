@@ -2,12 +2,11 @@
   <div class="container">
     <div id="gameboard">
 
-    <div v-for="row in 8" class="row" :key="row">
-      <div v-for="col in 8" v-bind:class = "(col%2===0 +row%2)?'light':'dark'" class="square" :key="col">
-
+    <div v-for="(col,colIndex) in chessBoard" class="row" :key="colIndex">
+      <div  style="color:red" v-for="(piece,rowIndex) in col" v-bind:class = "(rowIndex%2===0 + colIndex%2)?'light':'dark'" class="square"  :key="rowIndex">   
+        <font-awesome-icon :icon="piece.piece" size="2x" :color="piece.color" />                
       </div>
     </div>
-    
     </div>
   </div>
 </template>
@@ -16,8 +15,33 @@
 
 <script setup>
 
-
 import { onMounted } from 'vue'
+let boardArray = new Array(8).fill(new Array(8).fill(0));
+
+// let chessPieces = {
+//     pawn: 1,
+//     rook: 2,
+//     knight: 3,
+//     bishop: 4,
+//     queen: 5,
+//     king: 6
+// };
+
+
+
+let chessBoard = [
+    [{piece: 'chess-rook', color: 'white'}, {piece: 'chess-pawn', color: 'white'}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: 'chess-pawn', color: 'black'}, {piece: 'chess-rook', color: 'black'}],
+    [{piece: 'chess-knight', color: 'white'}, {piece: 'chess-pawn', color: 'white'}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: 'chess-pawn', color: 'black'}, {piece: 'chess-knight', color: 'black'}],
+    [{piece: 'chess-bishop', color: 'white'}, {piece: 'chess-pawn', color: 'white'}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: 'chess-pawn', color: 'black'}, {piece: 'chess-bishop', color: 'black'}],
+    [{piece: 'chess-queen', color: 'white'}, {piece: 'chess-pawn', color: 'white'}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: 'chess-pawn', color: 'black'}, {piece: 'chess-king', color: 'black'}],
+    [{piece: 'chess-king', color: 'white'}, {piece: 'chess-pawn', color: 'white'}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: 'chess-pawn', color: 'black'}, {piece: 'chess-queen', color: 'black'}],
+    [{piece: 'chess-bishop', color: 'white'}, {piece: 'chess-pawn', color: 'white'}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: 'chess-pawn', color: 'black'}, {piece: 'chess-bishop', color: 'black'}],
+    [{piece: 'chess-knight', color: 'white'}, {piece: 'chess-pawn', color: 'white'}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: 'chess-pawn', color: 'black'}, {piece: 'chess-knight', color: 'black'}],
+    [{piece: 'chess-rook', color: 'white'}, {piece: 'chess-pawn', color: 'white'}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: 'chess-pawn', color: 'black'}, {piece: 'chess-rook', color: 'black'}]
+];
+
+
+
 
 onMounted(() => {
   drawBoard();
@@ -26,7 +50,7 @@ onMounted(() => {
 
 function drawBoard(){
 
-let boardArray = new Array(64).fill(0);
+
 
 boardArray.forEach(()=>{
     const square = document.createElement('div');
@@ -48,8 +72,19 @@ boardArray.forEach(()=>{
 }
 
 .square{
+  display: flex;
+  align-items: center;
+  justify-content: center;
   height: 40px;
   width: 40px;
+}
+
+.whitePiece{
+  color: white;
+}
+
+.blackPiece{
+  color:black
 }
 
 .light{
