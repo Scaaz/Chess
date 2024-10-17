@@ -64,10 +64,10 @@ function clicked(colIndex, rowIndex, pieceType, pieceColor)
       //pawn
       for(let i = 1 ; i <=2; i++)
       {
-        let currentRow = pieceColor ? rowIndex - i : rowIndex + i;
-
-        highlightSet.value.add((colIndex) + ',' + currentRow);
-        if(chessBoard[colIndex][currentRow].type!=null){
+        let newRow = pieceColor ? rowIndex - i : rowIndex + i;
+        if (newRow > 7 || newRow < 0 || chessBoard[colIndex][newRow].color === pieceColor) break;
+        highlightSet.value.add((colIndex) + ',' + newRow);
+        if(chessBoard[colIndex][newRow].type!=null){
           break;
         }
       }
