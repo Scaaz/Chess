@@ -4,7 +4,8 @@
 
     <div v-for="(col,colIndex) in chessBoard" class="row" :key="colIndex">
       <div  style="color:red" v-for="(piece,rowIndex) in col" v-bind:class = "(rowIndex%2===0 + colIndex%2)?'light':'dark'" class="square"  :key="rowIndex">   
-        <font-awesome-icon :icon="piece.piece" size="2x" :color="piece.color" />                
+        <font-awesome-icon :icon="chessPieceIcons[piece.type]" size="2x" :color="chessPieceColors[piece.color]" />  
+
       </div>
     </div>
     </div>
@@ -14,27 +15,31 @@
 
 
 <script setup>
-// let chessPieces = {
-//     pawn: 1,
-//     rook: 2,
-//     knight: 3,
-//     bishop: 4,
-//     queen: 5,
-//     king: 6
-// };
+let chessPieceIcons = {
+  1:'chess-pawn',
+  2:'chess-rook',
+  3:'chess-knight',
+  4:'chess-bishop',
+  5:'chess-queen',
+  6:'chess-king'
+};
 
-
+let chessPieceColors = {
+0: 'white',
+1: 'black'
+}
 
 let chessBoard = [
-    [{piece: 'chess-rook', color: 'white'}, {piece: 'chess-pawn', color: 'white'}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: 'chess-pawn', color: 'black'}, {piece: 'chess-rook', color: 'black'}],
-    [{piece: 'chess-knight', color: 'white'}, {piece: 'chess-pawn', color: 'white'}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: 'chess-pawn', color: 'black'}, {piece: 'chess-knight', color: 'black'}],
-    [{piece: 'chess-bishop', color: 'white'}, {piece: 'chess-pawn', color: 'white'}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: 'chess-pawn', color: 'black'}, {piece: 'chess-bishop', color: 'black'}],
-    [{piece: 'chess-queen', color: 'white'}, {piece: 'chess-pawn', color: 'white'}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: 'chess-pawn', color: 'black'}, {piece: 'chess-king', color: 'black'}],
-    [{piece: 'chess-king', color: 'white'}, {piece: 'chess-pawn', color: 'white'}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: 'chess-pawn', color: 'black'}, {piece: 'chess-queen', color: 'black'}],
-    [{piece: 'chess-bishop', color: 'white'}, {piece: 'chess-pawn', color: 'white'}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: 'chess-pawn', color: 'black'}, {piece: 'chess-bishop', color: 'black'}],
-    [{piece: 'chess-knight', color: 'white'}, {piece: 'chess-pawn', color: 'white'}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: 'chess-pawn', color: 'black'}, {piece: 'chess-knight', color: 'black'}],
-    [{piece: 'chess-rook', color: 'white'}, {piece: 'chess-pawn', color: 'white'}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: null, color: null}, {piece: 'chess-pawn', color: 'black'}, {piece: 'chess-rook', color: 'black'}]
+    [{type: 2, color: 0}, {type: 1, color: 0}, {icon: null, color: null}, {icon: null, color: null}, {icon: null, color: null}, {icon: null, color: null}, {type: 1, color: 1}, {type: 2, color: 1}],
+    [{type: 3, color: 0}, {type: 1, color: 0}, {icon: null, color: null}, {icon: null, color: null}, {icon: null, color: null}, {icon: null, color: null}, {type: 1, color: 1}, {type: 3, color: 1}],
+    [{type: 4, color: 0}, {type: 1, color: 0}, {icon: null, color: null}, {icon: null, color: null}, {icon: null, color: null}, {icon: null, color: null}, {type: 1, color: 1}, {type: 4, color: 1}],
+    [{type: 5, color: 0}, {type: 1, color: 0}, {icon: null, color: null}, {icon: null, color: null}, {icon: null, color: null}, {icon: null, color: null}, {type: 1, color: 1}, {type: 6, color: 1}],
+    [{type: 6, color: 0}, {type: 1, color: 0}, {icon: null, color: null}, {icon: null, color: null}, {icon: null, color: null}, {icon: null, color: null}, {type: 1, color: 1}, {type: 5, color: 1}],
+    [{type: 4, color: 0}, {type: 1, color: 0}, {icon: null, color: null}, {icon: null, color: null}, {icon: null, color: null}, {icon: null, color: null}, {type: 1, color: 1}, {type: 4, color: 1}],
+    [{type: 3, color: 0}, {type: 1, color: 0}, {icon: null, color: null}, {icon: null, color: null}, {icon: null, color: null}, {icon: null, color: null}, {type: 1, color: 1}, {type: 3, color: 1}],
+    [{type: 2, color: 0}, {type: 1, color: 0}, {icon: null, color: null}, {icon: null, color: null}, {icon: null, color: null}, {icon: null, color: null}, {type: 1, color: 1}, {type: 2, color: 1}]
 ];
+
 </script>
 <style scoped>
 #gameboard{
