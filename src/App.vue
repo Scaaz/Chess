@@ -36,7 +36,7 @@ let chessBoard = [
     [{type: 2, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 2, color: 1}],
     [{type: 3, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 3, color: 1}],
     [{type: 4, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 4, color: 1}],
-    [{type: 5, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 6, color: 1}],
+    [{type: 5, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: 2, color: 1}, {type: null, color: null}, {type: 1, color: 1}, {type: 6, color: 1}],
     [{type: 6, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 5, color: 1}],
     [{type: 4, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 4, color: 1}],
     [{type: 3, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 3, color: 1}],
@@ -44,48 +44,80 @@ let chessBoard = [
 ];
 
 
-const coordinatesSet = ref(new Set());
-watch(coordinatesSet)
+const highlightSet = ref(new Set());
+watch(highlightSet)
 
 
 function isHighlighted(rowIndex, colIndex) {
-  return coordinatesSet.value.has(`${rowIndex},${colIndex}`);
+  return highlightSet.value.has(`${colIndex},${rowIndex}`);
 }
 
 function clicked(colIndex, rowIndex, pieceType, pieceColor)
 {
-  coordinatesSet.value.clear();
+  highlightSet.value.clear();
   switch(pieceType)
   {
     case null:
       
       break;
     case 1:
+      //pawn
       for(let i = 1 ; i <=2; i++)
       {
-        let currentRow;
-        if(pieceColor)
-        {
-          currentRow = rowIndex -i;          
-        }
-        else
-        {
-          currentRow = rowIndex +i; 
-        }
-        coordinatesSet.value.add((currentRow) + ',' + colIndex);
-        if(chessBoard[colIndex][currentRow].type!=null)
-        {
-          console.log("row=" + currentRow + " col="+ colIndex)
-          console.log(chessBoard[currentRow][colIndex])
+        let currentRow = pieceColor ? rowIndex - i : rowIndex + i;
+
+        highlightSet.value.add((colIndex) + ',' + currentRow);
+        if(chessBoard[colIndex][currentRow].type!=null){
           break;
         }
       }
+      break;
 
-      break;
       case 2:
-      break;
+      //rook
+      //down
+      for (let i = 1; i < 8; i++) {
+        let newRow = rowIndex + i;
+        if (newRow > 7 || chessBoard[colIndex][newRow].color === pieceColor) break;
+        highlightSet.value.add(colIndex + ',' + newRow);
+        if (chessBoard[colIndex][newRow].type != null) break;
+      }
+
+      //up
+      for (let i = 1; i < 8; i++) {
+        let newRow = rowIndex - i;
+        if (newRow < 0 || chessBoard[colIndex][newRow].color === pieceColor) break;
+        highlightSet.value.add(colIndex + ',' + newRow);
+        if (chessBoard[colIndex][newRow].type != null) break;
+      }
+
+      //right
+      for (let i = 1; i < 8; i++) {
+        let newCol = colIndex + i;
+        if (newCol > 7 || chessBoard[newCol][rowIndex].color === pieceColor) break;
+        highlightSet.value.add(newCol + ',' + rowIndex);
+        if (chessBoard[newCol][rowIndex].type != null) break;
+      }
+
+      //left
+      for (let i = 1; i < 8; i++) {
+        let newCol = colIndex - i;
+        if (newCol < 0 || chessBoard[newCol][rowIndex].color === pieceColor) break;
+        highlightSet.value.add(newCol + ',' + rowIndex);
+        if (chessBoard[newCol][rowIndex].type != null) break;
+      }
+  break;
+
+
 
     case 3:
+    for(let i = 1 ; i <=3; i++)
+      {
+
+        highlightSet.value.add((rowIndex+2) + ',' + colIndex+1);
+        highlightSet.value.add((rowIndex+2) + ',' + colIndex-1);
+     
+      }
       break;
 
       case 4:
