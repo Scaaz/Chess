@@ -1,9 +1,11 @@
 <template>
+  <div class="xddd">   Current player: {{ currentPlayerColor }}</div>
+
   <div class="container">
     <div id="gameboard">
       <div v-for="(col, colIndex) in chessBoard" :key="colIndex">
         <div
-          @click="clicked(colIndex, rowIndex, piece.type, piece.color)"
+          @click="tileClicked(colIndex, rowIndex, piece.type, piece.color)"
           v-for="(piece, rowIndex) in col"
           v-bind:class="rowIndex % 2 === 0 + (colIndex % 2) ? 'light' : 'dark'"
           class="square"
@@ -11,7 +13,7 @@
         >
           <div
             v-bind:class="
-              isHighlighted(rowIndex, colIndex)
+              isHighlighted(colIndex,rowIndex)
                 ? piece.type === null
                   ? 'move'
                   : 'attack'
@@ -61,7 +63,12 @@ let chessBoard = [
 const highlightSet = ref(new Set())
 watch(highlightSet)
 
-function isHighlighted(rowIndex, colIndex) {
+const currentlySelected = ref({col:Number,row:Number})
+watch(currentlySelected)
+
+const currentPlayerColor = ref('white')
+
+function isHighlighted(colIndex,rowIndex) {
   return highlightSet.value.has(`${colIndex},${rowIndex}`)   
 }
 
@@ -73,10 +80,24 @@ function moveFigure(rowIndex, colIndex, move, pieceColor, iterator = 1) {
   if (chessBoard[newCol][newRow].color === pieceColor) return true // same color piece
 
   highlightSet.value.add(newCol + ',' + newRow)
+  
   if (chessBoard[newCol][newRow].type != null) return true // stop if piece found
 }
 
-function clicked(colIndex, rowIndex, pieceType, pieceColor) {
+function movePieceToHighlightedSquare(colIndex, rowIndex)
+{
+  if(isHighlighted(colIndex, rowIndex))
+  {
+    chessBoard[colIndex] [rowIndex] = chessBoard[currentlySelected.value.colIndex][currentlySelected.value.rowIndex]
+    chessBoard[currentlySelected.value.colIndex][currentlySelected.value.rowIndex] = {type: null, color: null}
+    currentPlayerColor.value = currentPlayerColor.value === chessPieceColors[0] 
+    ? chessPieceColors[1] 
+    : chessPieceColors[0];
+  }
+  highlightSet.value.clear()
+}
+
+function highlightMoveSquares(colIndex, rowIndex, pieceType, pieceColor){
   highlightSet.value.clear()
   switch (pieceType) {
     case null:
@@ -180,6 +201,20 @@ function clicked(colIndex, rowIndex, pieceType, pieceColor) {
       break
   }
 }
+
+function tileClicked(colIndex, rowIndex, pieceType, pieceColor) {
+
+  if(pieceType == null)
+  {
+    movePieceToHighlightedSquare(colIndex, rowIndex);
+  }
+  else if( chessPieceColors[pieceColor] == currentPlayerColor.value)
+  {
+    highlightMoveSquares(colIndex, rowIndex, pieceType, pieceColor)
+    currentlySelected.value = {colIndex, rowIndex}
+  }
+}
+
 </script>
 <style scoped>
 #gameboard {
@@ -235,8 +270,16 @@ function clicked(colIndex, rowIndex, pieceType, pieceColor) {
 
 .container {
   width: 100%;
-  height: 100%;
+  height: 80%;
   display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.xddd
+{
+  color:white;
+  background-color: red;
+  height: 20%;
   align-items: center;
   justify-content: center;
 }
