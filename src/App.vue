@@ -245,15 +245,15 @@ function highlightMoveSquares(colIndex, rowIndex, pieceType, pieceColor){
 }
 
 function tileClicked(colIndex, rowIndex, pieceType, pieceColor) {
-console.log(rowIndex);
-  if(pieceType == null)
-  {
-    movePieceToHighlightedSquare(colIndex, rowIndex);
-  }
-  else if( chessPieceColors[pieceColor] == currentPlayerColor.value)
+   
+  if( chessPieceColors[pieceColor] == currentPlayerColor.value)
   {
     highlightMoveSquares(colIndex, rowIndex, pieceType, pieceColor)
     currentlySelected.value = {colIndex, rowIndex}
+  }
+  else
+  {
+    movePieceToHighlightedSquare(colIndex, rowIndex);
   }
 }
 
