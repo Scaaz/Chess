@@ -1,5 +1,5 @@
 <template>
-  <div class="xddd">   Current player: {{ currentPlayerColor }}</div>
+  <div class="currentPlayer">   Current player: {{ currentPlayerColor }}</div>
 
   <div class="container">
     <div id="gameboard">
@@ -84,6 +84,38 @@ function moveFigure(rowIndex, colIndex, move, pieceColor, iterator = 1) {
   if (chessBoard[newCol][newRow].type != null) return true // stop if piece found
 }
 
+function movePawn(rowIndex, colIndex, move, pieceColor, iterator = 1) {
+  let newRow = rowIndex + move.row * iterator
+  let newCol = colIndex + move.col * iterator
+
+  if (newRow < 0 || newRow > 7 || newCol < 0 || newCol > 7) return true // outside board
+  if (chessBoard[newCol][newRow].color === pieceColor) return true // same color piece
+
+  if (chessBoard[newCol][newRow].type != null) return true // stop if piece found
+  highlightSet.value.add(newCol + ',' + newRow)
+  
+}
+
+function pawnAttack(rowIndex, colIndex, move, pieceColor) {
+  let newRow = rowIndex + move.row 
+
+  let newCol = colIndex + move.col+1 
+  if (newRow < 0 || newRow > 7 || newCol < 0 || newCol > 7) return true // outside board
+  if (chessBoard[newCol][newRow].type != null && pieceColor != chessBoard[newCol][newRow].color) 
+  {
+    highlightSet.value.add(newCol + ',' + newRow)
+  }
+
+  newCol = colIndex + move.col-1 
+  if (newRow < 0 || newRow > 7 || newCol < 0 || newCol > 7) return true // outside board
+  if (chessBoard[newCol][newRow].type != null && pieceColor != chessBoard[newCol][newRow].color) 
+  {
+    highlightSet.value.add(newCol + ',' + newRow)
+  }
+    
+  if (chessBoard[newCol][newRow].type != null) return true // stop if piece found
+}
+
 function movePieceToHighlightedSquare(colIndex, rowIndex)
 {
   if(isHighlighted(colIndex, rowIndex))
@@ -161,8 +193,9 @@ function highlightMoveSquares(colIndex, rowIndex, pieceType, pieceColor){
         pawnRange = 2
       }
       for (let i = 1; i <= pawnRange; i++) {
-        moveFigure(rowIndex,colIndex,move,pieceColor,i)
+        movePawn(rowIndex,colIndex,move,pieceColor,i)
       }
+      pawnAttack(rowIndex,colIndex,move,pieceColor)
     
       break }
 
@@ -284,7 +317,7 @@ console.log(rowIndex);
   align-items: center;
   justify-content: center;
 }
-.xddd
+.currentPlayer
 {
   color:white;
   background-color: red;
