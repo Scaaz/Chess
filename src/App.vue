@@ -97,46 +97,15 @@ function movePieceToHighlightedSquare(colIndex, rowIndex)
   highlightSet.value.clear()
 }
 
-function highlightMoveSquares(colIndex, rowIndex, pieceType, pieceColor){
-  highlightSet.value.clear()
-  switch (pieceType) {
-    case null:
-      break
-    case 1:
-      //pawn
-      for (let i = 1; i <= 2; i++) {
-        let newRow = pieceColor ? rowIndex - i : rowIndex + i
-        if (
-          newRow > 7 ||
-          newRow < 0 ||
-          chessBoard[colIndex][newRow].color === pieceColor
-        )
-          break
-        highlightSet.value.add(colIndex + ',' + newRow)
-        if (chessBoard[colIndex][newRow].type != null) {
-          break
-        }
-      }
-      break
-
-    case 2:
-      //rook
-
-      for (let move of [
+const whitePawnMoves = { row: 1, col: 0 }
+const blackPawnMoves = { row: -1, col: 0 }
+const rookMoves = [
         { row: 1, col: 0 }, // down
         { row: -1, col: 0 }, // up
         { row: 0, col: 1 }, // right
         { row: 0, col: -1 }, // left
-      ]) {
-        for (let i = 1; i < 8; i++) {
-          if (moveFigure(rowIndex, colIndex, move, pieceColor, i)) break
-        }
-      }
-      break
-
-    case 3:
-      // knight
-      for (let move of [
+      ]
+const KnightMoves = [
         { row: -2, col: -1 },
         { row: -2, col: 1 }, // Two up, one left/right
         { row: -1, col: -2 },
@@ -145,19 +114,77 @@ function highlightMoveSquares(colIndex, rowIndex, pieceType, pieceColor){
         { row: 1, col: 2 }, // One down, two left/right
         { row: 2, col: -1 },
         { row: 2, col: 1 }, // Two down, one left/right
-      ]) {
+      ]
+const bishopMoves = [
+        { row: 1, col: 1 }, // bottom-right diagonal
+        { row: 1, col: -1 }, // bottom-left diagonal
+        { row: -1, col: 1 }, // top-right diagonal
+        { row: -1, col: -1 }, // top-left diagonal
+      ]
+const QueenMoves = [
+        { row: 1, col: 0 }, // down
+        { row: -1, col: 0 }, // up
+        { row: 0, col: 1 }, // right
+        { row: 0, col: -1 }, // left
+        { row: 1, col: 1 }, // bottom-right diagonal
+        { row: 1, col: -1 }, // bottom-left diagonal
+        { row: -1, col: 1 }, // top-right diagonal
+        { row: -1, col: -1 }, // top-left diagonal
+      ]
+const KingMoves = [
+        { row: 1, col: 0 }, // down
+        { row: -1, col: 0 }, // up
+        { row: 0, col: 1 }, // right
+        { row: 0, col: -1 }, // left
+        { row: 1, col: 1 }, // bottom-right diagonal
+        { row: 1, col: -1 }, // bottom-left diagonal
+        { row: -1, col: 1 }, // top-right diagonal
+        { row: -1, col: -1 }, // top-left diagonal
+      ]
+
+function highlightMoveSquares(colIndex, rowIndex, pieceType, pieceColor){
+  highlightSet.value.clear()
+  switch (pieceType) {
+    case null:
+      break
+    case 1:
+      //pawn
+      { let move = whitePawnMoves;
+      if(pieceColor == 1)
+      {
+        move = blackPawnMoves;
+      }
+   
+      let pawnRange = 1;
+      if(pieceColor == 0 && rowIndex == 1 || pieceColor == 1 && rowIndex == 6)
+      {
+        pawnRange = 2
+      }
+      for (let i = 1; i <= pawnRange; i++) {
+        moveFigure(rowIndex,colIndex,move,pieceColor,i)
+      }
+    
+      break }
+
+    case 2:
+      //rook
+      for (let move of rookMoves) {
+        for (let i = 1; i < 8; i++) {
+          if (moveFigure(rowIndex, colIndex, move, pieceColor, i)) break
+        }
+      }
+      break
+
+    case 3:
+      // knight
+      for (let move of KnightMoves) {
         moveFigure(rowIndex, colIndex, move, pieceColor)
       }
       break
 
     case 4:
       //bishop
-      for (let move of [
-        { row: 1, col: 1 }, // bottom-right diagonal
-        { row: 1, col: -1 }, // bottom-left diagonal
-        { row: -1, col: 1 }, // top-right diagonal
-        { row: -1, col: -1 }, // top-left diagonal
-      ]) {
+      for (let move of bishopMoves) {
         for (let i = 1; i < 8; i++) {
           if (moveFigure(rowIndex, colIndex, move, pieceColor, i)) break
         }
@@ -167,16 +194,7 @@ function highlightMoveSquares(colIndex, rowIndex, pieceType, pieceColor){
 
     case 5:
       // queen
-      for (let move of [
-        { row: 1, col: 0 }, // down
-        { row: -1, col: 0 }, // up
-        { row: 0, col: 1 }, // right
-        { row: 0, col: -1 }, // left
-        { row: 1, col: 1 }, // bottom-right diagonal
-        { row: 1, col: -1 }, // bottom-left diagonal
-        { row: -1, col: 1 }, // top-right diagonal
-        { row: -1, col: -1 }, // top-left diagonal
-      ]) {
+      for (let move of QueenMoves) {
         for (let i = 1; i < 8; i++) {
           if (moveFigure(rowIndex, colIndex, move, pieceColor, i)) break
         }
@@ -186,16 +204,7 @@ function highlightMoveSquares(colIndex, rowIndex, pieceType, pieceColor){
 
     case 6:
       // king
-      for (let move of [
-        { row: 1, col: 0 }, // down
-        { row: -1, col: 0 }, // up
-        { row: 0, col: 1 }, // right
-        { row: 0, col: -1 }, // left
-        { row: 1, col: 1 }, // bottom-right diagonal
-        { row: 1, col: -1 }, // bottom-left diagonal
-        { row: -1, col: 1 }, // top-right diagonal
-        { row: -1, col: -1 }, // top-left diagonal
-      ]) {
+      for (let move of KingMoves) {
         moveFigure(rowIndex, colIndex, move, pieceColor)
       }
       break
@@ -203,7 +212,7 @@ function highlightMoveSquares(colIndex, rowIndex, pieceType, pieceColor){
 }
 
 function tileClicked(colIndex, rowIndex, pieceType, pieceColor) {
-
+console.log(rowIndex);
   if(pieceType == null)
   {
     movePieceToHighlightedSquare(colIndex, rowIndex);
