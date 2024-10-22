@@ -1,6 +1,7 @@
 # Chess
 
-This template should help get you started developing with Vue 3 in Vite.
+Simple chess game that uses Vue, HTML and JS.
+I'll probably use it in case of making chess AI.
 
 ## Recommended IDE Setup
 
