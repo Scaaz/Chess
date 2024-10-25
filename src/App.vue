@@ -63,6 +63,7 @@ let chessBoard = [
 const highlightSet = ref(new Set())
 watch(highlightSet)
 
+
 const currentlySelected = ref({col:Number,row:Number})
 watch(currentlySelected)
 
