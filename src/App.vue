@@ -5,8 +5,8 @@
     <div id="gameboard">
       <div v-for="(col, colIndex) in chessBoard" :key="colIndex">
         <div
-          @click="tileClicked(colIndex, rowIndex, piece.type, piece.color)"
           v-for="(piece, rowIndex) in col"
+          @click="tileClicked(colIndex, rowIndex, piece.type, piece.color)"
           v-bind:class="rowIndex % 2 === 0 + (colIndex % 2) ? 'light' : 'dark'"
           class="square"
           :key="rowIndex"
@@ -33,7 +33,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watchEffect } from 'vue'
 
 let chessPieceIcons = {
   1: 'chess-pawn',
@@ -61,10 +61,10 @@ let chessBoard = [
 ];
 
 const currentlySelected = ref({col:Number,row:Number})
-watch(currentlySelected)
+watchEffect(currentlySelected)
 
 const highlightedArray = ref([]);
-watch(highlightedArray)
+watchEffect(highlightedArray)
 
 const currentPlayerColor = ref('white')
 
@@ -78,10 +78,36 @@ function isHighlighted(colIndex,rowIndex) {
   );
 }
 
-  function moveFigure(rowIndex, colIndex, moves, pieceColor, iterations = 1) {
-    let array = [];
-    
-    moves.forEach(move => {        
+  function highlightMoveSquares(colIndex, rowIndex, pieceType, pieceColor) {
+    let array = [];    
+    let iterations = 1;
+    let pieceMoves = [];
+    switch(pieceType)
+    {
+      case 1:
+        return movePawn(rowIndex, colIndex, pieceType, pieceColor)        
+      case 2:
+        pieceMoves = rookMoves;
+        iterations = 8
+        break;
+      case 3:
+        pieceMoves = KnightMoves;
+        break;
+      case 4:
+        pieceMoves = bishopMoves;
+        iterations = 8
+        break;
+      case 5:
+        pieceMoves = QueenMoves;
+        iterations = 8
+        break;
+      case 6:
+        pieceMoves = KingMoves;
+        break;
+    }
+
+
+    pieceMoves.forEach(move => {        
     for (let i = 1; i <= iterations; i++){
       let newRow = rowIndex + move.row * i
       let newCol = colIndex + move.col * i
@@ -90,42 +116,71 @@ function isHighlighted(colIndex,rowIndex) {
       if (chessBoard[newCol][newRow].color === pieceColor) break; // same color piece
 
       array.push({colIndex: newCol,  rowIndex: newRow});
-      if (chessBoard[newCol][newRow].type != null) break; // stop if piece found
+      if (chessBoard[newCol][newRow].pieceType != null) break; // stop if piece found
     }
   });
     return array;
 }
 
-function movePawn(rowIndex, colIndex, move, pieceColor, iterator = 1) {
-  let newRow = rowIndex + move.row * iterator
-  let newCol = colIndex + move.col * iterator
+function movePawn(rowIndex, colIndex, pieceType, pieceColor) {  
 
-  if (newRow < 0 || newRow > 7 || newCol < 0 || newCol > 7) return [] // outside board
-  if (chessBoard[newCol][newRow].color === pieceColor) return [] // same color piece
+   let move = whitePawnMoves;
+      if(pieceColor === 1)
+      {
+        move = blackPawnMoves;
+      }
 
-  if (chessBoard[newCol][newRow].type != null) return [] // stop if piece found
-  highlightedArray.value.push({colIndex: newCol,  rowIndex: newRow})
-  
+
+  let array = [];
+
+  let pawnRange = 1;
+      if(pieceColor == 0 && rowIndex == 1 || pieceColor == 1 && rowIndex == 6)
+      {
+        pawnRange = 2
+      }
+
+  for (let i = 1; i <= pawnRange; i++) {
+  let newRow = rowIndex + move.row * i
+  let newCol = colIndex + move.col * i
+
+  if (newRow < 0 || newRow > 7 || newCol < 0 || newCol > 7) return []; // outside board
+  if (chessBoard[newCol][newRow].color === pieceColor) return []; // same color piece
+  if (chessBoard[newCol][newRow].type != null) return []; // stop if piece found
+
+
+  array.push({colIndex: newCol,  rowIndex: newRow})
+  }
+  let attack = pawnAttack(rowIndex,colIndex, pieceType, pieceColor)
+  array = array.concat(attack)//add attack squares
+  return array;  
 }
 
-function pawnAttack(rowIndex, colIndex, move, pieceColor) {
-  let newRow = rowIndex + move.row 
+function pawnAttack(rowIndex, colIndex, pieceType, pieceColor) {  
+  let array = [];
+  let move = whitePawnMoves;
+    if(pieceColor == 1)
+    {
+      move = blackPawnMoves;
+    }
 
+  let newRow = rowIndex + move.row 
   let newCol = colIndex + move.col+1 
-  if (newRow < 0 || newRow > 7 || newCol < 0 || newCol > 7) return true // outside board
+  if (newRow < 0 || newRow > 7 || newCol < 0 || newCol > 7) return array // outside board
   if (chessBoard[newCol][newRow].type != null && pieceColor != chessBoard[newCol][newRow].color) 
   {
-    highlightedArray.value.push({colIndex: newCol,  rowIndex: newRow})
+    array.push({colIndex: newCol,  rowIndex: newRow})
   }
 
   newCol = colIndex + move.col-1 
-  if (newRow < 0 || newRow > 7 || newCol < 0 || newCol > 7) return true // outside board
+  if (newRow < 0 || newRow > 7 || newCol < 0 || newCol > 7) return array // outside board
   if (chessBoard[newCol][newRow].type != null && pieceColor != chessBoard[newCol][newRow].color) 
   {
-    highlightedArray.value.push({colIndex: newCol,  rowIndex: newRow})
+    array.push({colIndex: newCol,  rowIndex: newRow})
   }
     
-  if (chessBoard[newCol][newRow].type != null) return true // stop if piece found
+  if (chessBoard[newCol][newRow].type != null) return array // stop if piece found
+
+  return array;
 }
 
 function movePieceToHighlightedSquare(colIndex, rowIndex)
@@ -136,8 +191,7 @@ function movePieceToHighlightedSquare(colIndex, rowIndex)
     chessBoard[currentlySelected.value.colIndex][currentlySelected.value.rowIndex] = {type: null, color: null}
     currentPlayerColor.value = currentPlayerColor.value === chessPieceColors[0] 
     ? chessPieceColors[1] 
-    : chessPieceColors[0];
-    // isKingChecked()
+    : chessPieceColors[0];    
   }
   highlightedArray.value = [];
 }
@@ -187,70 +241,67 @@ const KingMoves = [
         { row: -1, col: -1 }, // top-left diagonal
       ]
 
-function highlightMoveSquares(colIndex, rowIndex, pieceType, pieceColor){
-  highlightedArray.value = []
-  switch (pieceType) {
-    case null:
-      break
-    case 1:
-      //pawn
-      { let move = whitePawnMoves;
-      if(pieceColor == 1)
-      {
-        move = blackPawnMoves;
-      }
-   
-      let pawnRange = 1;
-      if(pieceColor == 0 && rowIndex == 1 || pieceColor == 1 && rowIndex == 6)
-      {
-        pawnRange = 2
-      }
-      for (let i = 1; i <= pawnRange; i++) {
-        movePawn(rowIndex,colIndex,move,pieceColor,i)
-      }
-      pawnAttack(rowIndex,colIndex,move,pieceColor)
-    
-      break }
-
-    case 2:
-      //rook     
-        highlightedArray.value = moveFigure(rowIndex, colIndex, rookMoves, pieceColor, 8)    
-      break
-
-    case 3:
-      // knight      
-        highlightedArray.value =  moveFigure(rowIndex, colIndex, KnightMoves, pieceColor)      
-      break
-
-    case 4:
-      //bishop    
-        highlightedArray.value =  moveFigure(rowIndex, colIndex, bishopMoves, pieceColor, 8)
-      break
-
-    case 5:
-      // queen      
-        highlightedArray.value = moveFigure(rowIndex, colIndex, QueenMoves, pieceColor, 8)
-      break
-
-    case 6:
-      // king      
-        highlightedArray.value = moveFigure(rowIndex, colIndex, KingMoves, pieceColor)      
-      break
-  }
-}
-
 function tileClicked(colIndex, rowIndex, pieceType, pieceColor) {
    
-  if( chessPieceColors[pieceColor] == currentPlayerColor.value)
-  {
-    highlightMoveSquares(colIndex, rowIndex, pieceType, pieceColor)
-    currentlySelected.value = {colIndex, rowIndex}
-  }
-  else
-  {
-    movePieceToHighlightedSquare(colIndex, rowIndex);
-  }
+   if( chessPieceColors[pieceColor] == currentPlayerColor.value)
+   {
+      highlightedArray.value = highlightMoveSquares(colIndex, rowIndex, pieceType, pieceColor)
+      currentlySelected.value = {colIndex, rowIndex}
+   }
+   else
+   {
+     movePieceToHighlightedSquare(colIndex, rowIndex);
+     isKingChecked()
+   }
+ }
+
+function isKingChecked() 
+{
+  
+  let kingPosition = null;    
+  chessBoard.forEach((col, colIndex) => {
+    col.forEach((piece, rowIndex) => {
+      if (piece.type === 6 && chessPieceColors[piece.color] === currentPlayerColor.value) {
+        kingPosition = { rowIndex, colIndex };
+      }
+    });
+  });
+
+    if (!kingPosition) {
+        console.log("No king found for the current player.");
+        return false;
+    }
+
+    // Sprawdź, czy którakolwiek figura przeciwnika może zagrażać królowi
+    for (let colIndex = 0; colIndex < chessBoard.length; colIndex++) {
+        for (let rowIndex = 0; rowIndex < chessBoard[colIndex].length; rowIndex++) {
+            let piece = chessBoard[colIndex][rowIndex];
+            
+            // Jeśli to figura przeciwnika
+          if(piece.type != null){           
+            if (chessPieceColors[piece.color] !== currentPlayerColor.value){
+              let attackMoves = highlightMoveSquares(colIndex, rowIndex, piece.type, piece.color); // Funkcja, która zwraca dozwolone ruchy dla figury            
+   
+                // Sprawdź, czy jakikolwiek ruch figury przeciwnika prowadzi na pozycję króla
+                for (let move of attackMoves) {     
+                  if (move.colIndex === kingPosition.rowIndex && move.rowIndex === kingPosition.rowIndex) {    
+                    // console.log("i am row="+colIndex+ "col="+rowIndex +", type="+piece.type)
+                    // console.log("i attack" + attackMoves)
+                    //   console.log("king row="+kingPosition.row+"col="+kingPosition.colIndex )
+                      console.log("Check detected!");
+                      return true; // Znaleziono szach
+                    }
+                }
+            }
+          }
+        }
+    }
+
+    console.log("No check.");
+    return false; // Nie ma szacha
 }
+
+
 
 </script>
 <style scoped>
