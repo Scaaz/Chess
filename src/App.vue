@@ -290,14 +290,14 @@ function tileClicked(colIndex, rowIndex, pieceType, pieceColor) {
      movePiece(colIndex, rowIndex);
      if(pieceType == 6)
      {
-      if(currentPlayerColor.value === chessPieceColors[1])
-      {
-        wasBlackKingMoved.value = true
-      }
-      else
-      {
-        wasWhiteKingMoved.value = true
-      }
+        if(currentPlayerColor.value === chessPieceColors[1])
+        {
+          wasBlackKingMoved.value = true
+        }
+        else
+        {
+          wasWhiteKingMoved.value = true
+        }
      }
 
      //TODO: nie zawsze wykrywa że piece type 2 ruszone
