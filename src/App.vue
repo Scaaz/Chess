@@ -300,7 +300,7 @@ function tileClicked(colIndex, rowIndex, pieceType, pieceColor) {
         }
      }
 
-     //TODO: nie zawsze wykrywa że piece type 2 ruszone
+     //TODO: nie zawsze wykrywa że piece type 2 ruszone 
      if(pieceType == 2)
      {
       if(currentPlayerColor.value === chessPieceColors[1])
