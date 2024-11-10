@@ -411,7 +411,6 @@ function tileClicked(colIndex, rowIndex, pieceType, pieceColor) {
       }
     }
    }
-   
  }
 
 function canCastleLongSide()
