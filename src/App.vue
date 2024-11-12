@@ -1,6 +1,5 @@
 <template>
-  <div class="currentPlayer">   Current player: {{ currentPlayerColor }}</div>
-{{ currentlySelected }}
+  <div class="currentPlayer">   {{ currentPlayerColor }}'s turn</div>
   <div class="container">
     <div id="gameboard">
       <div v-for="(col, colIndex) in chessBoard" :key="colIndex">
@@ -13,7 +12,7 @@
         >
           <div
             v-bind:class="
-              isHighlighted(colIndex,rowIndex) || isCastle(colIndex,rowIndex)
+              isHighlighted(colIndex,rowIndex) || isCastle(colIndex,rowIndex) || isPawnDoubleMove(colIndex,rowIndex)
                 ? piece.type === null
                   ? 'move'
                   : 'attack'
@@ -49,16 +48,16 @@ let chessPieceColors = {
   1: 'black',
 }
 
-// let chessBoard = [
-//   [{type: 2, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 2, color: 1}],
-//   [{type: 3, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 3, color: 1}],
-//   [{type: 4, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 4, color: 1}],
-//   [{type: 5, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 6, color: 1}],
-//   [{type: 6, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 5, color: 1}],
-//   [{type: 4, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 4, color: 1}],
-//   [{type: 3, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 3, color: 1}],
-//   [{type: 2, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 2, color: 1}]
-// ];
+let chessBoard = [
+  [{type: 2, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 2, color: 1}],
+  [{type: 3, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 3, color: 1}],
+  [{type: 4, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 4, color: 1}],
+  [{type: 5, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 6, color: 1}],
+  [{type: 6, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 5, color: 1}],
+  [{type: 4, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 4, color: 1}],
+  [{type: 3, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 3, color: 1}],
+  [{type: 2, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 2, color: 1}]
+];
 
 // let chessBoard = [
 //   [{type: 2, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 2, color: 1}],
@@ -72,15 +71,15 @@ let chessPieceColors = {
 // ];
 
 
-let chessBoard = [
-  [{type: 2, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 2, color: 1}],
-  [{type: 3, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: null, color: null}],
-  [{type: 4, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: null, color: null}],
-  [{type: 5, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 6, color: 1}],
-  [{type: 6, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: null, color: null}],
-  [{type: 4, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: null, color: null}],
-  [{type: 3, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: null, color: null}],
-  [{type: 2, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 2, color: 1}]]
+// let chessBoard = [
+//   [{type: 2, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 2, color: 1}],
+//   [{type: 3, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: null, color: null}],
+//   [{type: 4, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: null, color: null}],
+//   [{type: 5, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 6, color: 1}],
+//   [{type: 6, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: null, color: null}],
+//   [{type: 4, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: null, color: null}],
+//   [{type: 3, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: null, color: null}],
+//   [{type: 2, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 2, color: 1}]]
 
 const currentlySelected = ref({col:Number,row:Number})
 watchEffect(currentlySelected)
@@ -92,7 +91,10 @@ const highlightedArray = ref([]);
 watchEffect(highlightedArray)
 
 const castleArray = ref([]);
-watchEffect(highlightedArray)
+watchEffect(castleArray)
+
+const pawnArray = ref([]);
+watchEffect(pawnArray)
 
 const wasBlackKingMoved = ref(false);
 const wasBlackShortMoved = ref(false);
@@ -134,15 +136,67 @@ function isCastle(colIndex,rowIndex) {
     position => position.rowIndex === rowIndex && position.colIndex === colIndex)
 }
 
+function isPawnDoubleMove(colIndex,rowIndex) {
+  if(pawnArray.value == [])
+  {
+    return false;
+  }
+  return pawnArray.value.some(
+    position => position.rowIndex === rowIndex && position.colIndex === colIndex)
+}
 
-  function GetMoveSquares(colIndex, rowIndex, pieceType, pieceColor) {
+
+function GetMoveSquares(colIndex, rowIndex, pieceType, pieceColor) {
     let array = [];    
     let iterations = 1;
     let pieceMoves = [];
     switch(pieceType)
     {
       case 1:
-        return movePawn(rowIndex, colIndex, pieceType, pieceColor)        
+        return movePawn(rowIndex, colIndex, pieceType, pieceColor)
+      case 2:
+        pieceMoves = rookMoves;
+        iterations = 8
+        break;
+      case 3:
+        pieceMoves = KnightMoves;
+        break;
+      case 4:
+        pieceMoves = bishopMoves;
+        iterations = 8
+        break;
+      case 5:
+        pieceMoves = QueenMoves;
+        iterations = 8
+        break;
+      case 6:
+        pieceMoves = KingMoves;
+        break;
+    }
+
+    pieceMoves.forEach(move => {        
+    for (let i = 1; i <= iterations; i++){
+      let newRow = rowIndex + move.row * i
+      let newCol = colIndex + move.col * i
+
+      if (newRow < 0 || newRow > 7 || newCol < 0 || newCol > 7) break; // outside board
+      if (chessBoard[newCol][newRow].color === pieceColor) break; // same color piece
+      array.push({colIndex: newCol,  rowIndex: newRow});
+      if (chessBoard[newCol][newRow].type != null) break; // stop if piece found
+    }
+  });
+    return array;
+}
+
+
+function GetAttackSquares(colIndex, rowIndex, pieceType, pieceColor) {
+    let array = [];    
+    let iterations = 1;
+    let pieceMoves = [];
+    switch(pieceType)
+    {
+      case 1:
+        return pawnAttack(rowIndex, colIndex, pieceType, pieceColor)
       case 2:
         pieceMoves = rookMoves;
         iterations = 8
@@ -179,32 +233,34 @@ function isCastle(colIndex,rowIndex) {
 
 function movePawn(rowIndex, colIndex, pieceType, pieceColor) {  
 
-   let move = whitePawnMoves;
-      if(pieceColor === 1)
-      {
-        move = blackPawnMoves;
-      }
-
+  let move = whitePawnMoves;
+  if(pieceColor === 1)
+  {
+    move = blackPawnMoves;
+  }
 
   let array = [];
+ 
+  
+  let newRow = rowIndex + move.row 
+  let newCol = colIndex + move.col 
 
-  let pawnRange = 1;
-      if(pieceColor == 0 && rowIndex == 1 || pieceColor == 1 && rowIndex == 6)
-      {
-        pawnRange = 2
-      }
-
-  for (let i = 1; i <= pawnRange; i++) {
-  let newRow = rowIndex + move.row * i
-  let newCol = colIndex + move.col * i
 
   if (newRow < 0 || newRow > 7 || newCol < 0 || newCol > 7) return []; // outside board
   if (chessBoard[newCol][newRow].color === pieceColor) return []; // same color piece
   if (chessBoard[newCol][newRow].type != null) return []; // stop if piece found
 
-
-  array.push({colIndex: newCol,  rowIndex: newRow})
+  
+  if(pieceColor == 0 && rowIndex == 1)
+  {
+    pawnArray.value.push({colIndex: newCol,  rowIndex: newRow+1})
   }
+  else if(pieceColor == 1 && rowIndex == 6)
+  {
+    pawnArray.value.push({colIndex: newCol,  rowIndex: newRow-1})
+  }
+  array.push({colIndex: newCol,  rowIndex: newRow})
+  
   let attack = pawnAttack(rowIndex,colIndex, pieceType, pieceColor)
   array = array.concat(attack)//add attack squares
   return array;  
@@ -238,9 +294,9 @@ function pawnAttack(rowIndex, colIndex, pieceType, pieceColor) {
   return array;
 }
 
-function movePiece(colIndex, rowIndex)
+function movePiece(targetcol, targetrow)
 { 
-  chessBoard[colIndex] [rowIndex] = chessBoard[currentlySelected.value.col][currentlySelected.value.row]
+  chessBoard[targetcol] [targetrow] = chessBoard[currentlySelected.value.col][currentlySelected.value.row]
   chessBoard[currentlySelected.value.col][currentlySelected.value.row] = {type: null, color: null}
 }
 
@@ -257,6 +313,8 @@ function EndTurn(){
   : chessPieceColors[0];
   highlightedArray.value = [];
   castleArray.value = [];
+  pawnArray.value = [];
+  removeEnPassantFakes(currentPlayerColor.value)
 }
 
 const whitePawnMoves = { row: 1, col: 0 }
@@ -333,8 +391,20 @@ function tileClicked(colIndex, rowIndex, pieceType, pieceColor) {
    }
    else if (isHighlighted(colIndex, rowIndex)) {  
     
-     movePiece(colIndex, rowIndex);
+    
+    if(pieceType === 7)
+   {
+    let direction = -1
+    if(currentPlayerColor.value === chessPieceColors[1])
+      {
+        direction = 1;
+      }
+    chessBoard[colIndex][rowIndex+direction] = {type: null, color: null}
+   }
+     movePiece(colIndex, rowIndex); 
      EndTurn();
+
+
      if(chessBoard[colIndex][rowIndex].type == 6)
      {
         if(chessBoard[colIndex][rowIndex].color === 1)
@@ -411,7 +481,36 @@ function tileClicked(colIndex, rowIndex, pieceType, pieceColor) {
       }
     }
    }
+    else if(isPawnDoubleMove(colIndex, rowIndex))
+   {
+      movePiece(colIndex,rowIndex);
+      let direction = -1
+      let fakePieceColor = 0;
+      if(currentPlayerColor.value === chessPieceColors[1])
+      {
+        direction = 1;
+        fakePieceColor = 1;
+      }
+      let newRow = rowIndex + direction;
+      chessBoard[colIndex][newRow] = {type: 7, color: fakePieceColor}
+      EndTurn();
+   }
  }
+
+ function removeEnPassantFakes(playerColor)
+ {
+  for (let colIndex = 0; colIndex < chessBoard.length; colIndex++) {
+    for (let rowIndex = 0; rowIndex < chessBoard[colIndex].length; rowIndex++) {
+      let piece = chessBoard[colIndex][rowIndex];
+
+      if(piece.type === 7 && chessPieceColors[piece.color] == playerColor)
+      {
+        chessBoard[colIndex][rowIndex] = {type: null, color: null}
+      }
+    }
+  }
+ }
+
 
 function canCastleLongSide()
 {
@@ -505,8 +604,8 @@ function getKingPosition(playerColor)
   for(let colIndex in chessBoard){
     for(let rowIndex in chessBoard){
       let piece = chessBoard[colIndex][rowIndex];
-    if (piece.type === 6 && chessPieceColors[piece.color] === playerColor) {
-      return  {colIndex, rowIndex}               
+      if (piece.type === 6 && chessPieceColors[piece.color] === playerColor) {
+        return  {colIndex, rowIndex}               
       }
     }
   } 
@@ -534,7 +633,7 @@ function isFieldChecked(checkedColIndex, checkedRowIndex)
       let piece = chessBoard[colIndex][rowIndex];
       // Jeśli to figura przeciwnika
       if(piece.type != null && chessPieceColors[piece.color] !== currentPlayerColor.value){  
-        let attackMoves = GetMoveSquares(colIndex, rowIndex, piece.type, piece.color);    
+        let attackMoves = GetAttackSquares(colIndex, rowIndex, piece.type, piece.color);    
         for (let move of attackMoves) {     
           if (move.colIndex == checkedColIndex && move.rowIndex == checkedRowIndex) {                        
             return true;
