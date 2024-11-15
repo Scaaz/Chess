@@ -1,8 +1,24 @@
-<template>
+<template>  
   <div class="currentPlayer">   {{ currentPlayerColor }}'s turn</div>
   <div class="container">
-    <div id="gameboard">
-      <div v-for="(col, colIndex) in chessBoard" :key="colIndex">
+    <div id="gameboard">      
+      <div v-for="(col, colIndex) in chessBoard" :key="colIndex" style="position: relative">
+        <div v-if="colIndex == upgradeColIndex" >
+          <div class="pawn-upgrade-overlay">
+            <div class="pawnUpgrade square" v-for="(piece, pieceType) in filteredIcons" :key="pieceType">                 
+              <font-awesome-icon
+                    :icon="piece"
+                    size="2x"
+                    :color="currentPlayerColor"
+                    style="cursor: pointer;"
+                    @click="upgradePawn(pieceType, colIndex, currentPlayerColor)"
+                  />
+            </div>
+            <div class="cancelPawnUpgrade" @click="closePawnUpgrade()">
+              X
+            </div>
+          </div>
+        </div>
         <div
           v-for="(piece, rowIndex) in col"
           @click="tileClicked(colIndex, rowIndex, piece.type, piece.color)"
@@ -34,7 +50,7 @@
 <script setup>
 import { ref, watchEffect } from 'vue'
 
-let chessPieceIcons = {
+const chessPieceIcons = {
   1: 'chess-pawn',
   2: 'chess-rook',
   3: 'chess-knight',
@@ -43,16 +59,27 @@ let chessPieceIcons = {
   6: 'chess-king',
 }
 
-let chessPieceColors = {
+const chessPieceColors = {
   0: 'white',
   1: 'black',
 }
+
+// let chessBoard = [
+//   [{type: 2, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 2, color: 1}],
+//   [{type: 3, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 3, color: 1}],
+//   [{type: 4, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 4, color: 1}],
+//   [{type: 5, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 6, color: 1}],
+//   [{type: 6, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 5, color: 1}],
+//   [{type: 4, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 4, color: 1}],
+//   [{type: 3, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 3, color: 1}],
+//   [{type: 2, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 2, color: 1}]
+// ];
 
 let chessBoard = [
   [{type: 2, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 2, color: 1}],
   [{type: 3, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 3, color: 1}],
   [{type: 4, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 4, color: 1}],
-  [{type: 5, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 6, color: 1}],
+  [{type: null, color: null}, {type: 1, color: 1}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 6, color: 1}],
   [{type: 6, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 5, color: 1}],
   [{type: 4, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 4, color: 1}],
   [{type: 3, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 3, color: 1}],
@@ -104,8 +131,17 @@ const wasWhiteKingMoved = ref(false);
 const wasWhiteShortMoved = ref(false);
 const wasWhiteLongMoved = ref(false);
 
+const upgradeColIndex = ref(null);
+
 const currentPlayerColor = ref('white')
 
+const filteredIcons = Object.fromEntries(
+  Object.entries(chessPieceIcons).filter(([key]) => key >= 2 && key <= 5)
+);
+
+function closePawnUpgrade(){
+  upgradeColIndex.value = null;
+}
 function getTileColor(rowIndex, colIndex)
 {
   if(rowIndex == currentlyChecked.value.row && colIndex == currentlyChecked.value.col)
@@ -314,6 +350,7 @@ function EndTurn(){
   highlightedArray.value = [];
   castleArray.value = [];
   pawnArray.value = [];
+  upgradeColIndex.value = null;
   removeEnPassantFakes(currentPlayerColor.value)
 }
 
@@ -362,7 +399,21 @@ const KingMoves = [
         { row: -1, col: -1 }, // top-left diagonal
       ]
 
-function tileClicked(colIndex, rowIndex, pieceType, pieceColor) {   
+function upgradePawn(pieceType,colIndex, color){
+let colorId = color=="black" ? 1 : 0;
+chessBoard[colIndex][0] = {type: parseInt(pieceType), color: colorId}
+if(color === chessPieceColors[0])
+{
+  chessBoard[colIndex][6] = {type: null, color: null}
+}
+else
+{
+  chessBoard[colIndex][1] = {type: null, color: null}
+}
+EndTurn();
+}
+
+function tileClicked(colIndex, rowIndex, pieceType, pieceColor) {
    if( chessPieceColors[pieceColor] == currentPlayerColor.value){
       highlightedArray.value = GetMoveSquares(colIndex, rowIndex, pieceType, pieceColor)
 
@@ -389,9 +440,18 @@ function tileClicked(colIndex, rowIndex, pieceType, pieceColor) {
 
       currentlySelected.value = {col:colIndex, row:rowIndex}
    }
-   else if (isHighlighted(colIndex, rowIndex)) {  
-    
-    
+   else if (isHighlighted(colIndex, rowIndex)) {
+    let piece = chessBoard[currentlySelected.value.col][currentlySelected.value.row];
+    if(rowIndex === 0 &&  piece.type === 1 && piece.color === 1)
+    {
+      upgradeColIndex.value = colIndex;
+    }
+    else if(rowIndex === 7 &&  piece.type === 1 && piece.color === 0)
+    {
+      upgradeColIndex.value = colIndex;
+    }
+    else
+    {    
     if(pieceType === 7)
    {
     let direction = -1
@@ -403,7 +463,6 @@ function tileClicked(colIndex, rowIndex, pieceType, pieceColor) {
    }
      movePiece(colIndex, rowIndex); 
      EndTurn();
-
 
      if(chessBoard[colIndex][rowIndex].type == 6)
      {
@@ -436,6 +495,7 @@ function tileClicked(colIndex, rowIndex, pieceType, pieceColor) {
           wasWhiteLongMoved.value = true;
         }      
      }
+    }
      highlightedArray.value = [];
      isKingChecked()
    }
@@ -644,9 +704,8 @@ function isFieldChecked(checkedColIndex, checkedRowIndex)
   }
   return false; // Nie ma szacha
 }
-
-
 </script>
+
 <style scoped>
 #gameboard {
   width: 320px;
@@ -705,7 +764,7 @@ function isFieldChecked(checkedColIndex, checkedRowIndex)
 
 .container {
   width: 100%;
-  height: 80%;
+  height: 85%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -713,9 +772,40 @@ function isFieldChecked(checkedColIndex, checkedRowIndex)
 .currentPlayer
 {
   color:white;
-  background-color: red;
-  height: 20%;
+  height: 15%;
+  font-size: 4rem;
   align-items: center;
+  display: flex;
   justify-content: center;
 }
+.pawnUpgrade {
+  background-color: gray;
+  box-shadow: 5px 5px 5px black;
+}
+
+.pawn-upgrade-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: top;
+  align-items: center;  
+}
+
+.cancelPawnUpgrade
+{
+  width: 40px;
+  height: 20px;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  box-shadow: 5px 5px 5px black;  
+  background-color: rgb(114, 114, 114);
+  cursor: pointer;
+}
+
 </style>
