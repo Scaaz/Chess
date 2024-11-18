@@ -641,7 +641,7 @@ function canCastleShortSide()
     //Black
     if(wasBlackKingMoved.value || wasBlackShortMoved.value)
     {
-      return false
+      return false;
     }
 
     //short side
