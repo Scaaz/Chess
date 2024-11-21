@@ -647,6 +647,7 @@ function canCastleShortSide()
   return true;
 }
 
+
 function getKingPosition(playerColor)
 {    
   for(let colIndex in chessBoard){
