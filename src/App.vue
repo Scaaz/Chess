@@ -49,54 +49,10 @@
 
 <script setup>
 import { ref, watchEffect } from 'vue'
+import './assets/style.css'
+import { startingChessboard, chessPieceColors, chessPieceIcons, KingMoves, KnightMoves, QueenMoves, bishopMoves, rookMoves  } from '@/data.vue'
 
-const chessPieceIcons = {
-  1: 'chess-pawn',
-  2: 'chess-rook',
-  3: 'chess-knight',
-  4: 'chess-bishop',
-  5: 'chess-queen',
-  6: 'chess-king',
-}
-
-const chessPieceColors = {
-  0: 'white',
-  1: 'black',
-}
-
-let chessBoard = [
-  [{type: 2, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 2, color: 1}],
-  [{type: 3, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 3, color: 1}],
-  [{type: 4, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 4, color: 1}],
-  [{type: 5, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 5, color: 0}, {type: null, color: null}, {type: 6, color: 1}],
-  [{type: 6, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 5, color: 1}],
-  [{type: 4, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 4, color: 1}],
-  [{type: 3, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 3, color: 1}],
-  [{type: 2, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 2, color: 1}]
-];
-
-// let chessBoard = [
-//   [{type: 2, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 2, color: 1}],
-//   [{type: null, color: null}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 3, color: 1}],
-//   [{type: null, color: null}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 4, color: 1}],
-//   [{type: null, color: null}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 6, color: 1}],
-//   [{type: 6, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 5, color: 1}],
-//   [{type: null, color: null}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 4, color: 1}],
-//   [{type: null, color: null}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 3, color: 1}],
-//   [{type: 2, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 2, color: 1}]
-// ];
-
-
-// let chessBoard = [
-//   [{type: 2, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 2, color: 1}],
-//   [{type: 3, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: null, color: null}],
-//   [{type: 4, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: null, color: null}],
-//   [{type: 5, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 6, color: 1}],
-//   [{type: 6, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: null, color: null}],
-//   [{type: 4, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: null, color: null}],
-//   [{type: 3, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: null, color: null}],
-//   [{type: 2, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 2, color: 1}]]
-
+let chessBoard = startingChessboard;
 const currentlySelected = ref({col:Number,row:Number})
 watchEffect(currentlySelected)
 
@@ -213,7 +169,6 @@ function GetMoveSquares(colIndex, rowIndex, pieceType, pieceColor) {
     return array;
 }
 
-
 function GetAttackSquares(colIndex, rowIndex, pieceType, pieceColor) {
     let array = [];    
     let iterations = 1;
@@ -268,7 +223,6 @@ function movePawn(rowIndex, colIndex, pieceType, pieceColor) {
   
   let newRow = rowIndex + move.row 
   let newCol = colIndex + move.col 
-
 
   if (newRow < 0 || newRow > 7 || newCol < 0 || newCol > 7) return []; // outside board
   if (chessBoard[newCol][newRow].color === pieceColor) return []; // same color piece
@@ -344,48 +298,6 @@ function EndTurn(){
 
 const whitePawnMoves = { row: 1, col: 0 }
 const blackPawnMoves = { row: -1, col: 0 }
-const rookMoves = [
-        { row: 1, col: 0 }, // down
-        { row: -1, col: 0 }, // up
-        { row: 0, col: 1 }, // right
-        { row: 0, col: -1 }, // left
-      ]
-const KnightMoves = [
-        { row: -2, col: -1 },
-        { row: -2, col: 1 }, // Two up, one left/right
-        { row: -1, col: -2 },
-        { row: -1, col: 2 }, // One up, two left/right
-        { row: 1, col: -2 },
-        { row: 1, col: 2 }, // One down, two left/right
-        { row: 2, col: -1 },
-        { row: 2, col: 1 }, // Two down, one left/right
-      ]
-const bishopMoves = [
-        { row: 1, col: 1 }, // bottom-right diagonal
-        { row: 1, col: -1 }, // bottom-left diagonal
-        { row: -1, col: 1 }, // top-right diagonal
-        { row: -1, col: -1 }, // top-left diagonal
-      ]
-const QueenMoves = [
-        { row: 1, col: 0 }, // down
-        { row: -1, col: 0 }, // up
-        { row: 0, col: 1 }, // right
-        { row: 0, col: -1 }, // left
-        { row: 1, col: 1 }, // bottom-right diagonal
-        { row: 1, col: -1 }, // bottom-left diagonal
-        { row: -1, col: 1 }, // top-right diagonal
-        { row: -1, col: -1 }, // top-left diagonal
-      ]
-const KingMoves = [
-        { row: 1, col: 0 }, // down
-        { row: -1, col: 0 }, // up
-        { row: 0, col: 1 }, // right
-        { row: 0, col: -1 }, // left
-        { row: 1, col: 1 }, // bottom-right diagonal
-        { row: 1, col: -1 }, // bottom-left diagonal
-        { row: -1, col: 1 }, // top-right diagonal
-        { row: -1, col: -1 }, // top-left diagonal
-      ]
 
 function upgradePawn(pieceType,colIndex, color){
 let colorId = color=="black" ? 1 : 0;
@@ -694,107 +606,3 @@ function isFieldChecked(checkedColIndex, checkedRowIndex)
   return false; // Nie ma szacha
 }
 </script>
-
-<style scoped>
-#gameboard {
-  width: 320px;
-  height: 320px;
-  background-color: red;
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.square {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 40px;
-  width: 40px;
-}
-
-.move {
-  background-color: gray;
-  border-radius: 50%;
-  height: 15px;
-  width: 15px;
-  opacity: 50%;
-  position: absolute;
-}
-
-.attack {
-  background-color: transparent;
-  border: 4px solid gray;
-  border-radius: 50%;
-  height: 40px;
-  width: 40px;
-  opacity: 50%;
-  position: absolute;
-}
-
-.whitePiece {
-  color: white;
-}
-
-.blackPiece {
-  color: black;
-}
-
-.light {
-  background-color: #ffd599;
-}
-
-.red{
-  background-color: #F33E42 !important;
-}
-
-.dark {
-  background-color: #b16e41;
-}
-
-.container {
-  width: 100%;
-  height: 85%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.currentPlayer
-{
-  color:white;
-  height: 15%;
-  font-size: 4rem;
-  align-items: center;
-  display: flex;
-  justify-content: center;
-}
-.pawnUpgrade {
-  background-color: gray;
-  box-shadow: 5px 5px 5px black;
-}
-
-.pawn-upgrade-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  justify-content: top;
-  align-items: center;  
-}
-
-.cancelPawnUpgrade
-{
-  width: 40px;
-  height: 20px;
-  align-items: center;
-  display: flex;
-  justify-content: center;
-  box-shadow: 5px 5px 5px black;  
-  background-color: rgb(114, 114, 114);
-  cursor: pointer;
-}
-
-</style>
