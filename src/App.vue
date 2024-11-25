@@ -50,7 +50,7 @@
 <script setup>
 import { ref, watchEffect } from 'vue'
 import './assets/style.css'
-import { startingChessboard, chessPieceColors, chessPieceIcons, KingMoves, KnightMoves, QueenMoves, bishopMoves, rookMoves  } from '@/data.vue'
+import { startingChessboard, chessPieceColors, chessPieceIcons, KingMoves, KnightMoves, QueenMoves, bishopMoves, rookMoves, blackPawnMoves, whitePawnMoves  } from '@/data.vue'
 
 let chessBoard = startingChessboard;
 const currentlySelected = ref({col:Number,row:Number})
@@ -128,55 +128,30 @@ function isPawnDoubleMove(colIndex,rowIndex) {
 
 
 function GetMoveSquares(colIndex, rowIndex, pieceType, pieceColor) {
-    let array = [];    
-    let iterations = 1;
-    let pieceMoves = [];
-    switch(pieceType)
-    {
-      case 1:
-        return movePawn(rowIndex, colIndex, pieceType, pieceColor)
-      case 2:
-        pieceMoves = rookMoves;
-        iterations = 8
-        break;
-      case 3:
-        pieceMoves = KnightMoves;
-        break;
-      case 4:
-        pieceMoves = bishopMoves;
-        iterations = 8
-        break;
-      case 5:
-        pieceMoves = QueenMoves;
-        iterations = 8
-        break;
-      case 6:
-        pieceMoves = KingMoves;
-        break;
-    }
-
-    pieceMoves.forEach(move => {        
-    for (let i = 1; i <= iterations; i++){
-      let newRow = rowIndex + move.row * i
-      let newCol = colIndex + move.col * i
-
-      if (newRow < 0 || newRow > 7 || newCol < 0 || newCol > 7) break; // outside board
-      if (chessBoard[newCol][newRow].color === pieceColor) break; // same color piece
-      array.push({colIndex: newCol,  rowIndex: newRow});
-      if (chessBoard[newCol][newRow].type != null) break; // stop if piece found
-    }
-  });
-    return array;
+  return GetSquaresCore(colIndex, rowIndex, pieceType, pieceColor,0)
 }
 
 function GetAttackSquares(colIndex, rowIndex, pieceType, pieceColor) {
+  return GetSquaresCore(colIndex, rowIndex, pieceType, pieceColor,1)
+}
+
+function GetSquaresCore(colIndex, rowIndex, pieceType, pieceColor,action) {
     let array = [];    
     let iterations = 1;
     let pieceMoves = [];
     switch(pieceType)
     {
       case 1:
-        return pawnAttack(rowIndex, colIndex, pieceType, pieceColor)
+        if(action == 1)
+        {
+          //attack
+          return pawnAttack(rowIndex, colIndex, pieceType, pieceColor)
+        }
+        else
+        {
+          //move
+          return movePawn(rowIndex, colIndex, pieceType, pieceColor)
+        }
       case 2:
         pieceMoves = rookMoves;
         iterations = 8
@@ -296,8 +271,7 @@ function EndTurn(){
   removeEnPassantFakes(currentPlayerColor.value)
 }
 
-const whitePawnMoves = { row: 1, col: 0 }
-const blackPawnMoves = { row: -1, col: 0 }
+
 
 function upgradePawn(pieceType,colIndex, color){
 let colorId = color=="black" ? 1 : 0;
@@ -558,7 +532,6 @@ function canCastleShortSide()
   }
   return true;
 }
-
 
 function getKingPosition(playerColor)
 {    

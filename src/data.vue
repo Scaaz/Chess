@@ -46,6 +46,9 @@ export const startingChessboard = [
 //   [{type: 3, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: null, color: null}],
 //   [{type: 2, color: 0}, {type: 1, color: 0}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: null, color: null}, {type: 1, color: 1}, {type: 2, color: 1}]]
 
+export const whitePawnMoves = { row: 1, col: 0 }
+export const blackPawnMoves = { row: -1, col: 0 }
+
 export const rookMoves = [
         { row: 1, col: 0 }, // down
         { row: -1, col: 0 }, // up
