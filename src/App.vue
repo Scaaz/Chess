@@ -289,7 +289,17 @@ EndTurn();
 
 function tileClicked(colIndex, rowIndex, pieceType, pieceColor) {
    if( chessPieceColors[pieceColor] == currentPlayerColor.value){
-      highlightedArray.value = GetMoveSquares(colIndex, rowIndex, pieceType, pieceColor)
+      let moveSquares = GetMoveSquares(colIndex, rowIndex, pieceType, pieceColor)
+
+      for(let square in moveSquares)
+      {
+        //todo 
+        //block movement when in check
+        //block movement that would make u in check
+        console.log(square)
+      }
+
+      highlightedArray.value = moveSquares;
 
       if(pieceType == 6)
       {      
