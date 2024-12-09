@@ -145,12 +145,12 @@ function GetSquaresCore(colIndex, rowIndex, pieceType, pieceColor,action) {
         if(action == 1)
         {
           //attack
-          return pawnAttack(rowIndex, colIndex, pieceType, pieceColor)
+          return pawnAttack(rowIndex, colIndex, pieceColor)
         }
         else
         {
           //move
-          return movePawn(rowIndex, colIndex, pieceType, pieceColor)
+          return movePawn(rowIndex, colIndex, pieceColor)
         }
       case 2:
         pieceMoves = rookMoves;
@@ -186,8 +186,32 @@ function GetSquaresCore(colIndex, rowIndex, pieceType, pieceColor,action) {
     return array;
 }
 
-function movePawn(rowIndex, colIndex, pieceType, pieceColor) {  
+function markPawnDoubleMove(rowIndex, colIndex, pieceColor){
+  let move = whitePawnMoves;
+  if(pieceColor === 1)
+  {
+    move = blackPawnMoves;
+  }
+  
+  let newRow = rowIndex + move.row 
+  let newCol = colIndex + move.col 
 
+  if (newRow < 0 || newRow > 7 || newCol < 0 || newCol > 7) return []; // outside board
+  if (chessBoard[newCol][newRow].color === pieceColor) return []; // same color piece
+  if (chessBoard[newCol][newRow].type != null) return []; // stop if piece found
+
+  
+  if(pieceColor == 0 && rowIndex == 1)
+  {
+    return {colIndex: newCol,  rowIndex: newRow+1}
+  }
+  else if(pieceColor == 1 && rowIndex == 6)
+  {
+    return {colIndex: newCol,  rowIndex: newRow-1}
+  }
+}
+
+function movePawn(rowIndex, colIndex, pieceColor) {  
   let move = whitePawnMoves;
   if(pieceColor === 1)
   {
@@ -201,25 +225,15 @@ function movePawn(rowIndex, colIndex, pieceType, pieceColor) {
 
   if (newRow < 0 || newRow > 7 || newCol < 0 || newCol > 7) return []; // outside board
   if (chessBoard[newCol][newRow].color === pieceColor) return []; // same color piece
-  if (chessBoard[newCol][newRow].type != null) return []; // stop if piece found
-
+  if (chessBoard[newCol][newRow].type != null) return []; // stop if piece found  
   
-  if(pieceColor == 0 && rowIndex == 1)
-  {
-    pawnArray.value.push({colIndex: newCol,  rowIndex: newRow+1})
-  }
-  else if(pieceColor == 1 && rowIndex == 6)
-  {
-    pawnArray.value.push({colIndex: newCol,  rowIndex: newRow-1})
-  }
+  let attack = pawnAttack(rowIndex,colIndex, pieceColor)
+  array = attack.concat(pawnArray.value)//add attack squares
   array.push({colIndex: newCol,  rowIndex: newRow})
-  
-  let attack = pawnAttack(rowIndex,colIndex, pieceType, pieceColor)
-  array = array.concat(attack)//add attack squares
   return array;  
 }
 
-function pawnAttack(rowIndex, colIndex, pieceType, pieceColor) {  
+function pawnAttack(rowIndex, colIndex, pieceColor) {  
   let array = [];
   let move = whitePawnMoves;
     if(pieceColor == 1)
@@ -247,14 +261,12 @@ function pawnAttack(rowIndex, colIndex, pieceType, pieceColor) {
   return array;
 }
 
-function movePiece(targetcol, targetrow)
-{ 
+function movePiece(targetcol, targetrow){ 
   chessBoard[targetcol] [targetrow] = chessBoard[currentlySelected.value.col][currentlySelected.value.row]
   chessBoard[currentlySelected.value.col][currentlySelected.value.row] = {type: null, color: null}
 }
 
-function movePieceToTarget(colIndex, rowIndex, targetcol, targetrow)
-{ 
+function movePieceToTarget(colIndex, rowIndex, targetcol, targetrow){ 
   chessBoard[targetcol] [targetrow] = chessBoard[colIndex][rowIndex];
   chessBoard[colIndex][rowIndex] = {type: null, color: null};
 
@@ -289,13 +301,20 @@ EndTurn();
 
 function tileClicked(colIndex, rowIndex, pieceType, pieceColor) {
    if( chessPieceColors[pieceColor] == currentPlayerColor.value){
-      let moveSquares = GetMoveSquares(colIndex, rowIndex, pieceType, pieceColor)
-
+    pawnArray.value = [];
+    let moveSquares = GetMoveSquares(colIndex, rowIndex, pieceType, pieceColor)
+    if(pieceType == 1){
+      let extraSquare = markPawnDoubleMove(rowIndex,colIndex, pieceColor);
+      moveSquares = moveSquares.concat(extraSquare); //todo: creating new vs modifying existing
+    }
       for(let square in moveSquares)
       {
         //todo 
         //block movement when in check
         //block movement that would make u in check
+        let currentSquare = moveSquares[square];
+        
+
         console.log(square)
       }
 
@@ -381,6 +400,7 @@ function tileClicked(colIndex, rowIndex, pieceType, pieceColor) {
      }
     }
      highlightedArray.value = [];
+     pawnArray.value = []
      isKingChecked()
    }
    else if(isCastle(colIndex,rowIndex))
