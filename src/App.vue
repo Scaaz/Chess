@@ -57,7 +57,7 @@ const currentlySelected = ref({col:Number,row:Number})
 watchEffect(currentlySelected)
 
 const currentlyChecked = ref({col:Number,row:Number})
-watchEffect(currentlySelected)
+watchEffect(currentlyChecked)
 
 const highlightedArray = ref([]);
 watchEffect(highlightedArray)
@@ -127,15 +127,15 @@ function isPawnDoubleMove(colIndex,rowIndex) {
 }
 
 
-function GetMoveSquares(colIndex, rowIndex, pieceType, pieceColor) {
-  return GetSquaresCore(colIndex, rowIndex, pieceType, pieceColor,0)
+function GetMoveSquares(colIndex, rowIndex, pieceType, pieceColor, usedChessBoard = chessBoard) {
+  return GetSquaresCore(colIndex, rowIndex, pieceType, pieceColor,0, usedChessBoard)
 }
 
-function GetAttackSquares(colIndex, rowIndex, pieceType, pieceColor) {
-  return GetSquaresCore(colIndex, rowIndex, pieceType, pieceColor,1)
+function GetAttackSquares(colIndex, rowIndex, pieceType, pieceColor, usedChessBoard = chessBoard) {
+  return GetSquaresCore(colIndex, rowIndex, pieceType, pieceColor,1, usedChessBoard)
 }
 
-function GetSquaresCore(colIndex, rowIndex, pieceType, pieceColor,action) {
+function GetSquaresCore(colIndex, rowIndex, pieceType, pieceColor,action, usedChessBoard = chessBoard) {
     let array = [];    
     let iterations = 1;
     let pieceMoves = [];
@@ -178,9 +178,9 @@ function GetSquaresCore(colIndex, rowIndex, pieceType, pieceColor,action) {
       let newCol = colIndex + move.col * i
 
       if (newRow < 0 || newRow > 7 || newCol < 0 || newCol > 7) break; // outside board
-      if (chessBoard[newCol][newRow].color === pieceColor) break; // same color piece
+      if (usedChessBoard[newCol][newRow].color === pieceColor) break; // same color piece
       array.push({colIndex: newCol,  rowIndex: newRow});
-      if (chessBoard[newCol][newRow].type != null) break; // stop if piece found
+      if (usedChessBoard[newCol][newRow].type != null) break; // stop if piece found
     }
   });
     return array;
@@ -193,22 +193,23 @@ function markPawnDoubleMove(rowIndex, colIndex, pieceColor){
     move = blackPawnMoves;
   }
   
-  let newRow = rowIndex + move.row 
+  let newRow = rowIndex + move.row
   let newCol = colIndex + move.col 
 
-  if (newRow < 0 || newRow > 7 || newCol < 0 || newCol > 7) return []; // outside board
-  if (chessBoard[newCol][newRow].color === pieceColor) return []; // same color piece
-  if (chessBoard[newCol][newRow].type != null) return []; // stop if piece found
-
-  
   if(pieceColor == 0 && rowIndex == 1)
   {
-    return {colIndex: newCol,  rowIndex: newRow+1}
+    newRow = newRow+1;
   }
   else if(pieceColor == 1 && rowIndex == 6)
   {
-    return {colIndex: newCol,  rowIndex: newRow-1}
+    newRow = newRow-1;
   }
+
+  if (newRow < 0 || newRow > 7 || newCol < 0 || newCol > 7) return []; // outside board
+  if (chessBoard[newCol][newRow].color === pieceColor) return []; // same color piece
+  if (chessBoard[newCol][newRow].type != null) return []; // stop if piece found  
+
+  return {colIndex: newCol,  rowIndex: newRow} 
 }
 
 function movePawn(rowIndex, colIndex, pieceColor) {  
@@ -281,6 +282,8 @@ function EndTurn(){
   pawnArray.value = [];
   upgradeColIndex.value = null;
   removeEnPassantFakes(currentPlayerColor.value)
+  currentlyChecked.value = {row : null, col : null}
+  isKingChecked(chessBoard);
 }
 
 
@@ -300,48 +303,62 @@ EndTurn();
 }
 
 function tileClicked(colIndex, rowIndex, pieceType, pieceColor) {
-   if( chessPieceColors[pieceColor] == currentPlayerColor.value){
-    pawnArray.value = [];
-    let moveSquares = GetMoveSquares(colIndex, rowIndex, pieceType, pieceColor)
-    if(pieceType == 1){
-      let extraSquare = markPawnDoubleMove(rowIndex,colIndex, pieceColor);
+  if( chessPieceColors[pieceColor] == currentPlayerColor.value){
+  pawnArray.value = [];
+  let moveSquares = GetMoveSquares(colIndex, rowIndex, pieceType, pieceColor)
+  if(pieceType == 1){
+    let extraSquare = markPawnDoubleMove(rowIndex,colIndex, pieceColor);
+    if(extraSquare)
+    {
       moveSquares = moveSquares.concat(extraSquare); //todo: creating new vs modifying existing
     }
-      for(let square in moveSquares)
-      {
-        //todo 
-        //block movement when in check
-        //block movement that would make u in check
-        let currentSquare = moveSquares[square];
-        
+  }
+  let indexesToRemove =[];
+  for(let [index, currentSquare] of moveSquares.entries())
+  {
+    let fakeChessBoard = structuredClone(chessBoard);//deepclone
+    //todo 
+    //block movement when in check
+    //block movement that would make u in check
+    fakeChessBoard[colIndex][rowIndex] = {type: null, color: null}
+    fakeChessBoard[currentSquare.colIndex ][currentSquare.rowIndex] = {type: pieceType, color: pieceColor}
+    let kingChecked = isKingChecked(fakeChessBoard);
+    if(kingChecked)
+    {
+      indexesToRemove.push(index);   
+    }
+  }
+  
+  let moveSquaresFixed = structuredClone(moveSquares);
+  indexesToRemove.sort((a, b) => b - a);
+  for(let id of indexesToRemove)
+  {
+    moveSquaresFixed.splice(id,1);
+  }
+  highlightedArray.value = moveSquaresFixed;
 
-        console.log(square)
+  if(pieceType == 6)
+  {      
+    if(pieceColor === 1)
+    {
+      if(canCastleLongSide()) {
+        castleArray.value.push({rowIndex : 7, colIndex : 5})
       }
-
-      highlightedArray.value = moveSquares;
-
-      if(pieceType == 6)
-      {      
-        if(pieceColor === 1)
-        {
-          if(canCastleLongSide()) {
-            castleArray.value.push({rowIndex : 7, colIndex : 5})
-          }
-          if(canCastleShortSide()){
-            castleArray.value.push({rowIndex : 7, colIndex : 1})
-          }
-        }
-        else {
-          if(canCastleLongSide()) {
-            castleArray.value.push({colIndex : 2, rowIndex : 0})
-          }
-          if(canCastleShortSide()) {           
-            castleArray.value.push({colIndex : 6, rowIndex : 0})
-          }
-        }
+      if(canCastleShortSide()){
+        castleArray.value.push({rowIndex : 7, colIndex : 1})
       }
+    }
+    else {
+      if(canCastleLongSide()) {
+        castleArray.value.push({colIndex : 2, rowIndex : 0})
+      }
+      if(canCastleShortSide()) {           
+        castleArray.value.push({colIndex : 6, rowIndex : 0})
+      }
+    }
+  }
 
-      currentlySelected.value = {col:colIndex, row:rowIndex}
+  currentlySelected.value = {col:colIndex, row:rowIndex}
    }
    else if (isHighlighted(colIndex, rowIndex)) {
     let piece = chessBoard[currentlySelected.value.col][currentlySelected.value.row];
@@ -401,7 +418,7 @@ function tileClicked(colIndex, rowIndex, pieceType, pieceColor) {
     }
      highlightedArray.value = [];
      pawnArray.value = []
-     isKingChecked()
+     isKingChecked(chessBoard)
    }
    else if(isCastle(colIndex,rowIndex))
    {    
@@ -563,11 +580,11 @@ function canCastleShortSide()
   return true;
 }
 
-function getKingPosition(playerColor)
+function getKingPosition(playerColor, usedChessBoard)
 {    
-  for(let colIndex in chessBoard){
-    for(let rowIndex in chessBoard){
-      let piece = chessBoard[colIndex][rowIndex];
+  for(let colIndex in usedChessBoard){
+    for(let rowIndex in usedChessBoard){
+      let piece = usedChessBoard[colIndex][rowIndex];
       if (piece.type === 6 && chessPieceColors[piece.color] === playerColor) {
         return  {colIndex, rowIndex}               
       }
@@ -575,14 +592,14 @@ function getKingPosition(playerColor)
   } 
 }
 
-function isKingChecked() 
+function isKingChecked(usedChessBoard) 
 {  
-  let kingPosition = getKingPosition(currentPlayerColor.value);
+  let kingPosition = getKingPosition(currentPlayerColor.value, usedChessBoard);
   if (!kingPosition) {
       console.log("No king found for the current player.");
       return false;
   }
-  let isKingChecked = isFieldChecked(kingPosition.colIndex, kingPosition.rowIndex)
+  let isKingChecked = isFieldChecked(kingPosition.colIndex, kingPosition.rowIndex,usedChessBoard);
   if(isKingChecked)
   {
     currentlyChecked.value = {row : kingPosition.rowIndex, col : kingPosition.colIndex}
@@ -590,14 +607,14 @@ function isKingChecked()
   }
 }
 
-function isFieldChecked(checkedColIndex, checkedRowIndex) 
+function isFieldChecked(checkedColIndex, checkedRowIndex, usedChessBoard = chessBoard) 
 {
-  for (let colIndex = 0; colIndex < chessBoard.length; colIndex++) {
-    for (let rowIndex = 0; rowIndex < chessBoard[colIndex].length; rowIndex++) {
-      let piece = chessBoard[colIndex][rowIndex];
+  for (let colIndex = 0; colIndex < usedChessBoard.length; colIndex++) {
+    for (let rowIndex = 0; rowIndex < usedChessBoard[colIndex].length; rowIndex++) {
+      let piece = usedChessBoard[colIndex][rowIndex];
       // Jeśli to figura przeciwnika
       if(piece.type != null && chessPieceColors[piece.color] !== currentPlayerColor.value){  
-        let attackMoves = GetAttackSquares(colIndex, rowIndex, piece.type, piece.color);    
+        let attackMoves = GetAttackSquares(colIndex, rowIndex, piece.type, piece.color, usedChessBoard);    
         for (let move of attackMoves) {     
           if (move.colIndex == checkedColIndex && move.rowIndex == checkedRowIndex) {                        
             return true;
