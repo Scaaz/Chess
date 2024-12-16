@@ -1,8 +1,10 @@
 <template>  
-  textbox: {{ textbox }}
+  
   <div class="currentPlayer">   {{ currentPlayerColor }}'s turn</div>
   <div class="container">
-    <div id="gameboard">      
+    
+    <div id="gameboard">     
+      <EndgameModal :isOpen="modalIsOpen" :result="textbox" @modalClose="resetGame()"></EndgameModal> 
       <div v-for="(col, colIndex) in chessBoard" :key="colIndex" style="position: relative">
         <div v-if="colIndex == upgradeColIndex" >
           <div class="pawn-upgrade-overlay">
@@ -52,8 +54,9 @@
 import { ref, watchEffect } from 'vue'
 import './assets/style.css'
 import { startingChessboard, chessPieceColors, chessPieceIcons, KingMoves, KnightMoves, QueenMoves, bishopMoves, rookMoves, blackPawnMoves, whitePawnMoves  } from '@/data.vue'
+import  EndgameModal  from '@/components/EndgameModal.vue'
 
-let chessBoard = startingChessboard;
+let chessBoard = structuredClone(startingChessboard);
 const currentlySelected = ref({col:Number,row:Number})
 watchEffect(currentlySelected)
 
@@ -69,6 +72,7 @@ watchEffect(castleArray)
 const pawnArray = ref([]);
 watchEffect(pawnArray)
 
+const modalIsOpen = ref(false);
 const textbox = ref("string");
 const wasBlackKingMoved = ref(false);
 const wasBlackShortMoved = ref(false);
@@ -99,6 +103,20 @@ function getTileColor(rowIndex, colIndex)
   {
     return rowIndex % 2 === 0 + (colIndex % 2) ? 'light' : 'dark'
   }
+}
+
+function resetGame()
+{
+  currentPlayerColor.value = chessPieceColors[0];
+  highlightedArray.value = [];
+  castleArray.value = [];
+  pawnArray.value = [];
+  upgradeColIndex.value = null;
+  removeEnPassantFakes(chessPieceColors[0]);
+  removeEnPassantFakes(chessPieceColors[1]);
+  chessBoard = structuredClone(startingChessboard);
+  currentlyChecked.value = {row : null, col : null};
+  modalIsOpen.value = false;
 }
 
 function isHighlighted(colIndex,rowIndex) {
@@ -294,11 +312,13 @@ function EndTurn(){
     if(!canPlayerMove)
     {
       textbox.value = "CHECKMATE"
+      modalIsOpen.value = true;
     }
   }
 else if (!canPlayerMove)
 {
   textbox.value = "STALEMATE"
+  modalIsOpen.value = true;
 }
 }
 
