@@ -1,4 +1,5 @@
 <template>  
+  textbox: {{ textbox }}
   <div class="currentPlayer">   {{ currentPlayerColor }}'s turn</div>
   <div class="container">
     <div id="gameboard">      
@@ -68,6 +69,7 @@ watchEffect(castleArray)
 const pawnArray = ref([]);
 watchEffect(pawnArray)
 
+const textbox = ref("string");
 const wasBlackKingMoved = ref(false);
 const wasBlackShortMoved = ref(false);
 const wasBlackLongMoved = ref(false);
@@ -237,10 +239,10 @@ function movePawn(rowIndex, colIndex, pieceColor) {
 function pawnAttack(rowIndex, colIndex, pieceColor) {  
   let array = [];
   let move = whitePawnMoves;
-    if(pieceColor == 1)
-    {
-      move = blackPawnMoves;
-    }
+  if(pieceColor == 1)
+  {
+    move = blackPawnMoves;
+  }
 
   let newRow = rowIndex + move.row 
   let newCol = colIndex + move.col+1 
@@ -284,14 +286,58 @@ function EndTurn(){
   removeEnPassantFakes(currentPlayerColor.value)
   currentlyChecked.value = {row : null, col : null}
   let isChecked = isKingChecked(chessBoard);
+  let canPlayerMove = CanPlayerMove(chessBoard)
   if(isChecked)
   {
     let kingPosition = getKingPosition(currentPlayerColor.value,chessBoard);
     currentlyChecked.value = {row : kingPosition.rowIndex, col : kingPosition.colIndex}
+    if(!canPlayerMove)
+    {
+      textbox.value = "CHECKMATE"
+    }
   }
+else if (!canPlayerMove)
+{
+  textbox.value = "STALEMATE"
+}
 }
 
-
+function CanPlayerMove(usedChessBoard)
+{
+  for (let colIndex = 0; colIndex < usedChessBoard.length; colIndex++) {
+    for (let rowIndex = 0; rowIndex < usedChessBoard[colIndex].length; rowIndex++) {
+      let piece = usedChessBoard[colIndex][rowIndex];
+      // if the player piece
+      if(piece.type != null && chessPieceColors[piece.color] === currentPlayerColor.value){  
+        let moveSquares = GetMoveSquares(colIndex, rowIndex, piece.type, piece.color, usedChessBoard);
+        let indexesToRemove = [];
+      for(let [index, currentSquare] of moveSquares.entries())
+      {
+        //cancel moves that would make u checked
+        let fakeChessBoard = structuredClone(chessBoard);//deepclone
+        fakeChessBoard[colIndex][rowIndex] = {type: null, color: null}
+        fakeChessBoard[currentSquare.colIndex ][currentSquare.rowIndex] = {type: piece.type, color: piece.color}
+        let wouldKingBeChecked = isKingChecked(fakeChessBoard);
+        if(wouldKingBeChecked)
+        {
+          indexesToRemove.push(index);   
+        }
+      }
+      let moveSquaresFixed = structuredClone(moveSquares);
+  indexesToRemove.sort((a, b) => b - a);
+  for(let id of indexesToRemove)
+  {
+    moveSquaresFixed.splice(id,1);
+  }
+      if(moveSquaresFixed.length > 0)
+      {
+        return true;
+      }                        
+      }
+    }
+  }
+  return false;
+}
 
 function upgradePawn(pieceType,colIndex, color){
 let colorId = color=="black" ? 1 : 0;
@@ -599,13 +645,14 @@ function isKingChecked(usedChessBoard)
   let kingPosition = getKingPosition(currentPlayerColor.value, usedChessBoard);
   if (!kingPosition) {
       console.log("No king found for the current player.");
-      return false;
+      return true;
   }
   let isKingChecked = isFieldChecked(kingPosition.colIndex, kingPosition.rowIndex,usedChessBoard);
   if(isKingChecked)
   {   
-    return true
+    return true;
   }
+  return false;
 }
 
 function isFieldChecked(checkedColIndex, checkedRowIndex, usedChessBoard = chessBoard) 
